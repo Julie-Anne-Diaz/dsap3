@@ -45,5 +45,5 @@ public:
     std::map<std::string,int> shortestEdges(int id);
     int studentZone(int id);
 
-    bool ParseCommand(const string &command);
+    std::string ParseCommand(const string &command);
 };

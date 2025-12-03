@@ -72,7 +72,9 @@ std::vector<std::vector<int>> primMST(const std::vector<std::vector<int>>& MST, 
                 u = v;
             }
         }
-
+        if (u == -1) {
+            break;
+        }
         inMST[u] = true;
 
         for (int v = 0; v < n; v++) {
@@ -105,6 +107,14 @@ std::vector<std::string> SplitCommand(const std::string& command) {
 
     while (iss >> token) {
         word.push_back(token);
+        if (token.find('\"') != std::string::npos && token.substr(1).find('\"')==std::string::npos) {
+            iss>>token;
+            word[word.size()-1] += " " + token;
+            while (token.find('\"') == std::string::npos) {
+                iss>>token;
+                word[word.size()-1] += " " + token;
+            }
+        }
     }
 
     return word;

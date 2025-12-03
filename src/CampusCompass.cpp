@@ -30,6 +30,7 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
 
     std::string line1;
     int max = 0;
+    std::getline(edges, line1);
     while (std::getline(edges, line1)) {
         std::vector<std::string> row;
         std::stringstream ss(line1);
@@ -38,14 +39,13 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
         while (std::getline(ss, cell, ',')) {
             row.push_back(cell);
         }
-
         //first loc id and second loc id
         int pos1 = std::stoi(row[0]);
         int pos2 = std::stoi(row[1]);
 
         //resize vector if needed
-        if (max<pos1) {
-            max=pos1;
+        if (max<pos1+1) {
+            max=pos1+1;
             for (size_t i = 0; i < map.size(); i++) {
                 map[i].resize(max,-1);
                 open[i].resize(max,false);
@@ -53,8 +53,10 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
             map.resize(max,std::vector<int>(max,-1));
             open.resize(max,std::vector<bool>(max,false));
         }
-        if (max<pos2) {
-            max=pos2;
+
+
+        if (max<pos2+1) {
+            max=pos2+1;
             for (size_t i = 0; i < map.size(); i++) {
                 map[i].resize(max,-1);
                 open[i].resize(max,false);
@@ -65,14 +67,18 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
 
         map[pos1][pos2]=std::stoi(row[4]);
         map[pos2][pos1]=std::stoi(row[4]);
+
         open[pos2][pos1]=true;
         open[pos1][pos2]=true;
+
         Locations[pos1]=row[2];
         Locations[pos2]=row[3];
-    }
-    edges.close();
 
+    }
+
+    edges.close();
     std::string line2;
+    std::getline(classes, line2);
     while (std::getline(classes, line2)) {
         std::vector<std::string> row;
         std::stringstream ss(line2);
@@ -87,155 +93,157 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
     return true;
 }
 
-bool CampusCompass::ParseCommand(const string &command) {
+std::string CampusCompass::ParseCommand(const string &command) {
     std::vector<std::string> words = SplitCommand(command);
     if (words.empty()){
-        std::cout<<"unsuccessful"<<std::endl;
-        return false;
+        return "unsuccessful";
     }
     if (words[0]=="insert") {
-        if (words.size()<6 || !isNumber(words[2]) || !isNumber(words[3]) || !isNumber(words[4]) || (int)words.size()-4!=std::stoi(words[4])) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+        if (words.size()<6 || words[1].length()<2 || !isNumber(words[2]) || !isNumber(words[3]) || !isNumber(words[4]) || (int)words.size()-5!=std::stoi(words[4]) || stoi(words[3])>=(int)map.size()) {
+            return "unsuccessful";
         }
         std::vector <std::string> c;
         for (size_t i = 5; i < words.size(); i++) {
             c.push_back(words[i]);
         }
-        return insert(words[1],std::stoi(words[2]),std::stoi(words[3]),c);
+        if (insert(words[1].substr(1,words[1].length()-2),std::stoi(words[2]),std::stoi(words[3]),c)) {
+            return "successful";
+        }
+        return "unsuccessful";
     }
     if (words[0]=="remove") {
         if (words.size()!=2 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+            return "unsuccessful";
         }
-        return remove(std::stoi(words[1]));
+        if (remove(std::stoi(words[1]))) {
+            return "successful";
+        }
+        return "unsuccessful";
     }
     if (words[0]=="dropClass") {
         if (words.size()!=3 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+            return "unsuccessful";
         }
-        return drop(std::stoi(words[1]),words[2]);
+        if (drop(std::stoi(words[1]),words[2])) {
+            return "successful";
+        }
+        return "unsuccessful";
     }
     if (words[0]=="replaceClass") {
         if (words.size()!=4 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+            return "unsuccessful";
         }
-        return replace(std::stoi(words[1]),words[2],words[3]);
+        if (replace(std::stoi(words[1]),words[2],words[3])) {
+            return "successful";
+        }
+        return "unsuccessful";
     }
     if (words[0]=="removeClass") {
         if (words.size()!=2) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+            return "unsuccessful";
         }
-        std::cout<<removeClass(words[1])<<std::endl;
-        return true;
+        return to_string(removeClass(words[1]));
     }
     if (words[0]=="toggleEdgesClosure") {
-        if (words.size()<2 || !isNumber(words[1]) || (int)words.size()-2!=std::stoi(words[1])) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+        if (words.size()<2 || !isNumber(words[1]) || ((int)words.size()-2)/2!=std::stoi(words[1])) {
+            return "unsuccessful";
         }
         std::vector<int> edges;
         for (size_t i = 2; i < words.size(); i++) {
+            if (stoi(words[i])>=(int)map.size()) {
+                return "unsuccessful";
+            }
             edges.push_back(std::stoi(words[i]));
         }
         toggleEdge(edges);
-        std::cout<<"successful"<<std::endl;
-        return true;
+        return "successful";
     }
     if (words[0]=="checkEdgeStatus") {
-        if (words.size()!=3 || !isNumber(words[1]) || !isNumber(words[2])) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+        if (words.size()!=3 || !isNumber(words[1]) || !isNumber(words[2]) || stoi(words[1])>=(int)map.size() || stoi(words[2])>=(int)map.size()) {
+            return "DNE";
         }
-        std::cout<<checkEdge(std::stoi(words[1]),std::stoi(words[2]))<<std::endl;
-        return true;
+        return checkEdge(std::stoi(words[1]),std::stoi(words[2]));
     }
     if (words[0]=="isConnected") {
-        if (words.size()!=3 || !isNumber(words[1]) || !isNumber(words[2])) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+        if (words.size()!=3 || !isNumber(words[1]) || !isNumber(words[2]) || stoi(words[1])>=(int)map.size() || stoi(words[2])>=(int)map.size()) {
+            return "unsuccessful";
         }
-        isConnected(std::stoi(words[1]),std::stoi(words[2]));
-        return true;
+        if (isConnected(std::stoi(words[1]),std::stoi(words[2]))) {
+            return "successful";
+        }
+        return "unsuccessful";
     }
     if (words[0]=="printShortestEdges") {
-        if (words.size()!=2 || !isNumber(words[1]) ||!validID(std::stoi(words[1]))) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+        if (words.size()!=2 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
+            return "unsuccessful";
         }
+        std::string s;
         std::map<std::string,int> e = shortestEdges(std::stoi(words[1]));
         for (auto it = e.begin(); it != e.end(); ++it) {
-            std::cout<<it->first<<" | Total Time: "<<it->second<<std::endl;
+            s+="Name: "+students[std::stoi(words[1])]->name+"\n"+it->first+" | Total Time: "+to_string(it->second)+"\n";
         }
-        return true;
+        if (!s.empty()) {
+            s=s.substr(0,s.length()-1);
+        }
+        return s;
     }
     if (words[0]=="printStudentZone") {
         if (words.size()!=2 || !isNumber(words[1]) ||!validID(std::stoi(words[1]))) {
-            std::cout<<"unsuccessful"<<std::endl;
-            return false;
+            return "unsuccessful";
         }
-        std::cout<<studentZone(std::stoi(words[1]))<<std::endl;
-        return true;
+        return "Student Zone Cost For "+students[stoi(words[1])]->name+": " + to_string(studentZone(std::stoi(words[1])));
     }
-    return false;
+    return "unsuccessful";
 }
 
 bool CampusCompass::insert(std::string n, int id, int residence, std::vector<std::string> c) {
     if (!validID(id) || !validName(n) || students.count(id) || c.empty() || c.size()>6) {
-        std::cout<<"unsuccessful"<<std::endl;
         return false;
     }
     students[id]=new Student(n,id,residence);
     for (std::string s : c) {
         students[id]->classes.insert(s);
     }
-    std::cout<<"successful"<<std::endl;
     return true;
 }
 bool CampusCompass::remove(int id) {
     if (!students.count(id)) {
-        std::cout<<"unsuccessful"<<std::endl;
         return false;
     }
     delete students[id];
     students.erase(id);
-    std::cout<<"successful"<<std::endl;
     return true;
 }
 
 bool CampusCompass::drop(int id,std::string className) {
     if (!students.count(id) || !students[id]->classes.count(className) || !AllClasses.count(className)) {
-        std::cout<<"unsuccessful"<<std::endl;
         return false;
     }
     students[id]->classes.erase(className);
     if (students[id]->classes.empty()) {
         remove(id);
     }
-    std::cout<<"successful"<<std::endl;
     return true;
 }
 bool CampusCompass::replace(int id, std::string class1, std::string class2) {
     if (!students.count(id) || !students[id]->classes.count(class1) || students[id]->classes.count(class2) || !AllClasses.count(class2)) {
-        std::cout<<"unsuccessful"<<std::endl;
         return false;
     }
     students[id]->classes.erase(class1);
     students[id]->classes.insert(class2);
-    std::cout<<"successful"<<std::endl;
     return true;
 }
 int CampusCompass::removeClass(std::string className) {
-    int count=0;
-    for (auto it = students.begin(); it != students.end(); ++it) {
-        if (it->second->classes.count(className)) {
-            drop(it->first,className);
-            count++;
+    int count = 0;
+    std::vector<int> toRemove;
+    for (auto p : students) {
+        if (p.second->classes.count(className)) {
+            toRemove.push_back(p.first);
         }
+    }
+    for (int id : toRemove) {
+        drop(id, className);
+        count++;
     }
     return count;
 }
@@ -272,7 +280,6 @@ bool CampusCompass::isConnected(int p1, int p2) {
         for (size_t i = 0; i < map[temp].size(); i++) {
             if (open[temp][i]) {
                 if ((int)i==p2) {
-                    std::cout<<"successful"<<std::endl;
                     return true;
                 }
                 if (!visited.count(i)) {
@@ -282,7 +289,6 @@ bool CampusCompass::isConnected(int p1, int p2) {
             }
         }
     }
-    std::cout<<"unsuccessful"<<std::endl;
     return false;
 }
 std::map<std::string,int> CampusCompass::shortestEdges(int id) {
@@ -293,19 +299,18 @@ std::map<std::string,int> CampusCompass::shortestEdges(int id) {
     std::unordered_set<int> visited;
 
     //store locations of students classes
-    std::unordered_set<int> classLocation;
+    std::map<int,std::string> classLocation;
     for (auto it = students[id]->classes.begin(); it != students[id]->classes.end(); ++it) {
-        classLocation.emplace(AllClasses[*it]);
-        times[*it]=-1;
+        classLocation[AllClasses[*it]]=*it;
     }
 
     distances[students[id]->residence]=0;
     while (!distances.empty()) {
         //pick value with the smallest distance
-        int smallest = distances[0];
-        int temp = 0;
+        int smallest = distances.begin()->second;
+        int temp = distances.begin()->first;
         for (const auto& pair : distances) {
-            if (pair.second>smallest) {
+            if (pair.second<smallest) {
                 smallest = pair.second;
                 temp = pair.first;
             }
@@ -313,7 +318,7 @@ std::map<std::string,int> CampusCompass::shortestEdges(int id) {
 
         //if next removed is a class location store it
         if (classLocation.count(temp)) {
-            times[Locations[temp]]=smallest;
+            times[classLocation[temp]]=smallest;
         }
 
         //remove from distances and add to visited
@@ -345,10 +350,10 @@ int CampusCompass::studentZone(int id) {
     distances[students[id]->residence]=0;
     while (!distances.empty()) {
         //pick value with the smallest distance
-        int smallest = distances[0];
-        int temp = 0;
+        int smallest = distances.begin()->second;
+        int temp = distances.begin()->first;
         for (const auto& pair : distances) {
-            if (pair.second>smallest) {
+            if (pair.second<smallest) {
                 smallest = pair.second;
                 temp = pair.first;
             }
@@ -376,14 +381,17 @@ int CampusCompass::studentZone(int id) {
     visited.clear();
     for (auto it = students[id]->classes.begin(); it != students[id]->classes.end(); ++it) {
         int temp = AllClasses[*it];
-        while (parents[temp]!=-1) {
-            visited.insert(parents[temp]);
+        if (!parents.count(temp)) {
+            continue;
+        }
+        while (parents[temp] != -1) {
+            visited.insert(temp);
             temp = parents[temp];
         }
+        visited.insert(temp);
     }
 
-    std::vector<std::vector<int>> MST;
-    MST.resize(map.size());
+    std::vector<std::vector<int>> MST(map.size(),std::vector<int>(map.size(), 0));
     for (auto it = visited.begin(); it != visited.end(); ++it) {
         for (auto it2 = it; it2 != visited.end(); ++it2) {
             if (map[*it][*it2]>0 && open[*it2][*it]) {
