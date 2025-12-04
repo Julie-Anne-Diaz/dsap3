@@ -111,6 +111,13 @@ build CMakeFiles/Tests.dir/src/CampusCompass.cpp.obj: CXX_COMPILER__Tests_unscan
   OBJECT_DIR = CMakeFiles\Tests.dir
   OBJECT_FILE_DIR = CMakeFiles\Tests.dir\src
 
+build CMakeFiles/Tests.dir/src/functions.cpp.obj: CXX_COMPILER__Tests_unscanned_Debug C$:/Users/julian.diaz/CLionProjects/dsap3/src/functions.cpp || cmake_object_order_depends_target_Tests
+  DEP_FILE = CMakeFiles\Tests.dir\src\functions.cpp.obj.d
+  FLAGS = -Wall -Werror -g -fdiagnostics-color=always
+  INCLUDES = -IC:/Users/julian.diaz/CLionProjects/dsap3/src -IC:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug/_deps/catch2-src/src/catch2/.. -IC:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug/_deps/catch2-build/generated-includes
+  OBJECT_DIR = CMakeFiles\Tests.dir
+  OBJECT_FILE_DIR = CMakeFiles\Tests.dir\src
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Tests
@@ -119,7 +126,7 @@ build CMakeFiles/Tests.dir/src/CampusCompass.cpp.obj: CXX_COMPILER__Tests_unscan
 #############################################
 # Link the executable Tests.exe
 
-build Tests.exe Tests-b12d07c_tests.cmake | ${cmake_ninja_workdir}Tests-b12d07c_tests.cmake: CXX_EXECUTABLE_LINKER__Tests_Debug CMakeFiles/Tests.dir/test/test.cpp.obj CMakeFiles/Tests.dir/src/CampusCompass.cpp.obj | _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a || _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a copy_data
+build Tests.exe Tests-b12d07c_tests.cmake | ${cmake_ninja_workdir}Tests-b12d07c_tests.cmake: CXX_EXECUTABLE_LINKER__Tests_Debug CMakeFiles/Tests.dir/test/test.cpp.obj CMakeFiles/Tests.dir/src/CampusCompass.cpp.obj CMakeFiles/Tests.dir/src/functions.cpp.obj | _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a || _deps/catch2-build/src/libCatch2Maind.a _deps/catch2-build/src/libCatch2d.a copy_data
   FLAGS = -Wall -Werror -g
   LINK_LIBRARIES = _deps/catch2-build/src/libCatch2Maind.a  _deps/catch2-build/src/libCatch2d.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Tests.dir

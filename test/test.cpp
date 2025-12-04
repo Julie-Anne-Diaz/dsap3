@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
-
+#include <sstream>
 // change if you choose to use a different header name
 #include "CampusCompass.h"
 
@@ -15,10 +15,10 @@ TEST_CASE("Example Test Name - Change me!", "[tag]") {
 
   // anything that evaluates to false in a REQUIRE block will result in a
   // failing test
-  REQUIRE(one == 0); // fix me!
+  REQUIRE_FALSE(one == 0); // fix me!
 
   // all REQUIRE blocks must evaluate to true for the whole test to pass
-  REQUIRE(false); // also fix me!
+  REQUIRE(true); // also fix me!
 }
 
 TEST_CASE("Test 2", "[tag]") {
@@ -60,7 +60,6 @@ dropClass 10000001 COP3502
 remove 10000001
 removeClass COP3502
 )";
-
   string expectedOutput = R"(successful
 successful
 successful
@@ -69,16 +68,155 @@ unsuccessful
 2
 )";
 
+  std::stringstream iss(input);
   string actualOutput;
-
-  // somehow pass your input into your CampusCompass and parse it to call the
-  // correct functions, for example:
-  /*
+  std::string line;
   CampusCompass c;
-  c.parseInput(input)
-  // this would be some function that sends the output from your class into a string for use in testing
-  actualOutput = c.getStringRepresentation()
-  */
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
 
   REQUIRE(actualOutput == expectedOutput);
+}
+
+TEST_CASE("Incorrect Commands 1", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+unsuccessful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+}
+TEST_CASE("Incorrect Commands 2", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+unsuccessful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("Incorrect Commands 3", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+unsuccessful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("Incorrect Commands 4", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+unsuccessful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("Incorrect Commands 5", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+unsuccessful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
 }

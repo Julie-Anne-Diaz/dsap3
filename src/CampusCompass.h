@@ -7,6 +7,8 @@
 using namespace std;
 
 //classcode -> locationID
+extern std::unordered_map<std::string, int> endTimes;
+extern std::unordered_map<std::string,int> startTimes;
 extern std::unordered_map<std::string, int> AllClasses;
 //locationID -> location name
 extern std::unordered_map<int, std::string> Locations;
@@ -44,6 +46,7 @@ public:
     bool isConnected(int p1, int p2);
     std::map<std::string,int> shortestEdges(int id);
     int studentZone(int id);
-
+    int shortestPath(int startLocation, int endLocation);
+    std::string verifySchedule(int ID);
     std::string ParseCommand(const string &command);
 };

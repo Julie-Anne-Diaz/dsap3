@@ -5,11 +5,11 @@
 #include <iostream>
 #include <queue>
 #include <sstream>
-
 #include "functions.h"
 
 using namespace std;
-
+std::unordered_map<std::string, int> endTimes;
+std::unordered_map<std::string,int> startTimes;
 std::unordered_map<std::string, int> AllClasses;
 std::unordered_map<int, std::string> Locations;
 
@@ -88,6 +88,8 @@ bool CampusCompass::ParseCSV(const string &edges_filepath, const string &classes
             row.push_back(cell);
         }
         AllClasses[row[0]]=std::stoi(row[1]);
+        startTimes[row[0]]=std::stoi(row[2].substr(0,row[2].find(':')))*60 + std::stoi(row[2].substr(row[2].find(':')+1));
+        endTimes[row[0]]=std::stoi(row[3].substr(0,row[3].find(':')))*60 + std::stoi(row[3].substr(row[3].find(':')+1));
     }
     classes.close();
     return true;
@@ -192,6 +194,16 @@ std::string CampusCompass::ParseCommand(const string &command) {
             return "unsuccessful";
         }
         return "Student Zone Cost For "+students[stoi(words[1])]->name+": " + to_string(studentZone(std::stoi(words[1])));
+    }
+    if (words[0]=="verifySchedule") {
+        if (words.size()!=2 || !isNumber(words[1]) ||!validID(std::stoi(words[1]))) {
+            return "unsuccessful";
+        }
+        std::string ret = verifySchedule(stoi(words[1]));
+        if (!ret.empty() && ret!="unsuccessful") {
+            return ret.substr(0, ret.size()-1);
+        }
+        return ret;
     }
     return "unsuccessful";
 }
@@ -414,5 +426,67 @@ int CampusCompass::studentZone(int id) {
     return sum;
 
 }
+
+int CampusCompass::shortestPath(int startLocation,int endLocation) {
+    std::unordered_set<int> visited;
+    std::unordered_map<int,int> distances;
+    //visited->parent
+
+    distances[startLocation]=0;
+    while (!distances.empty()) {
+        //pick value with the smallest distance
+        int smallest = distances.begin()->second;
+        int temp = distances.begin()->first;
+        for (const auto& pair : distances) {
+            if (pair.second<smallest) {
+                smallest = pair.second;
+                temp = pair.first;
+            }
+        }
+        if (temp==endLocation) {
+            return smallest;
+        }
+        //remove from distances and add to visited
+        distances.erase(temp);
+        visited.insert(temp);
+
+        //check edges and adjust distances
+        for (size_t i = 0; i < map[temp].size(); i++) {
+            if (open[temp][i] && !visited.count(i)) {
+                if (!distances.count(i) || smallest+map[temp][i]<distances[i]) {
+                    distances[i]=smallest+map[temp][i];
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+std::string CampusCompass::verifySchedule(int ID) {
+    if (students[ID]->classes.size()<=1) {
+        return "unsuccessful";
+    }
+    std::string ret;
+    std::priority_queue<std::pair<int,std::string>> q;
+    for (auto it : startTimes) {
+        if (students[ID]->classes.count(it.first)) {
+            q.push({it.second,it.first});
+        }
+    }
+    std::string start = q.top().second;
+    q.pop();
+    while (!q.empty()) {
+        if (startTimes[start] + shortestPath(AllClasses[start],AllClasses[q.top().second]) < q.top().first) {
+            ret+=start + " - " + q.top().second + " \"Can make it!\"\n";
+        }
+        else {
+            ret+=start + " - " + q.top().second + " \"Cannot make it!\"\n";
+        }
+        start=q.top().second;
+        q.pop();
+    }
+    return ret;
+}
+
 
 

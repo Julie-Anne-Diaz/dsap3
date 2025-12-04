@@ -1,0 +1,7 @@
+add_test( [==[Example Test Name - Change me!]==] C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug/Tests.exe [==[Example Test Name - Change me!]==]  )
+set_tests_properties( [==[Example Test Name - Change me!]==] PROPERTIES WORKING_DIRECTORY C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug)
+add_test( [==[Test 2]==] C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug/Tests.exe [==[Test 2]==]  )
+set_tests_properties( [==[Test 2]==] PROPERTIES WORKING_DIRECTORY C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug)
+add_test( [==[Example CampusCompass Output Test]==] C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug/Tests.exe [==[Example CampusCompass Output Test]==]  )
+set_tests_properties( [==[Example CampusCompass Output Test]==] PROPERTIES WORKING_DIRECTORY C:/Users/julian.diaz/CLionProjects/dsap3/cmake-build-debug)
+set( Tests_TESTS [==[Example Test Name - Change me!]==] [==[Test 2]==] [==[Example CampusCompass Output Test]==])
