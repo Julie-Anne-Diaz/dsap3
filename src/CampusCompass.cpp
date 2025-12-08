@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include <algorithm>
 #include <sstream>
 #include "functions.h"
 
@@ -473,27 +474,28 @@ std::string CampusCompass::verifySchedule(std::string ID) {
     if (!students.count(ID) || students[ID]->classes.size()<=1) {
         return "unsuccessful";
     }
-    std::string ret;
+    std::string ret = "Schedule Check for "+students[ID]->name+":\n";
     //order classes by start time
-    std::priority_queue<std::pair<int,std::string>> q;
+    std::vector<std::pair<int,std::string>> q;
     for (auto it : startTimes) {
         if (students[ID]->classes.count(it.first)) {
-            q.push({it.second,it.first});
+            q.push_back({it.second,it.first});
         }
     }
+    std::sort(q.begin(),q.end());
     //check each class pair for validity
-    std::string start = q.top().second;
-    q.pop();
+    std::string start = q[0].second;
+    q.erase(q.begin());
     while (!q.empty()) {
         //mini dikstras // endtime+traveltime < starttime
-        if (endTimes[start] + shortestPath(AllClasses[start],AllClasses[q.top().second]) < q.top().first) {
-            ret+=start + " - " + q.top().second + " \"Can make it!\"\n";
+        if (endTimes[start] + shortestPath(AllClasses[start],AllClasses[q[0].second]) < q[0].first) {
+            ret+=start + " - " + q[0].second + " \"Can make it!\"\n";
         }
         else {
-            ret+=start + " - " + q.top().second + " \"Cannot make it!\"\n";
+            ret+=start + " - " + q[0].second + " \"Cannot make it!\"\n";
         }
-        start=q.top().second;
-        q.pop();
+        start=q[0].second;
+        q.erase(q.begin());
     }
     return ret;
 }

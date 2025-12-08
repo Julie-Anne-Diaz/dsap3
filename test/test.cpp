@@ -429,7 +429,7 @@ unsuccessful
   REQUIRE(actualOutput == expectedOutput);
 }
 
-TEST_CASE("Checking printShortestEdges after dropping/replacing classes (0/5)", "[flag]") {
+TEST_CASE("verifySchedule with edge cases and toggled edges (0/5)", "[flag]") {
   string input = R"(13
 insert "John" 11111111 20 4 EEL3701 EEL4744 EEL3111 CEN4907
 verifySchedule 11111111
@@ -443,6 +443,7 @@ toggleEdgesClosure 1 6 43
 verifySchedule 33333333
 insert "Aman" 44444444 1 1 COP4600
 verifySchedule 44444444
+verifySchedule 99999999
 )";
   string expectedOutput = R"(successful
 Schedule Check for John:
@@ -462,6 +463,7 @@ successful
 Schedule Check for Albert:
 COP3503 - CNT4007 "Can make it!"
 successful
+unsuccessful
 unsuccessful
 )";
   std::stringstream iss(input);
