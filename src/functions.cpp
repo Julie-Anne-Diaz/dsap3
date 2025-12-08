@@ -17,8 +17,8 @@ bool validName(std::string s) {
     }
     return true;
 }
-bool validID(int i) {
-    if (std::to_string(i).length()!=8) {
+bool validID(std::string i) {
+    if (i.length()!=8) {
         return false;
     }
     return true;

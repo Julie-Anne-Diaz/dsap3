@@ -1,3 +1,4 @@
+
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include <sstream>
@@ -82,20 +83,10 @@ unsuccessful
 }
 
 TEST_CASE("Incorrect Commands 1", "[flag]") {
-  string input = R"(6
-insert "Student A" 10000001 1 1 COP3502
-insert "Student B" 10000002 1 1 COP3502
-insert "Student C" 10000003 1 2 COP3502 MAC2311
-dropClass 10000001 COP3502
-remove 10000001
-removeClass COP3502
+  string input = R"(1
+insert "A11y" 45679999 1 1 COP3530
 )";
-  string expectedOutput = R"(successful
-successful
-successful
-successful
-unsuccessful
-2
+  string expectedOutput = R"(unsuccessful
 )";
   std::stringstream iss(input);
   string actualOutput;
@@ -110,17 +101,17 @@ unsuccessful
 }
 TEST_CASE("Incorrect Commands 2", "[flag]") {
   string input = R"(6
-insert "Student A" 10000001 1 1 COP3502
+insert "Student A" 10000001 1 2 COP3502
 insert "Student B" 10000002 1 1 COP3502
 insert "Student C" 10000003 1 2 COP3502 MAC2311
 dropClass 10000001 COP3502
 remove 10000001
 removeClass COP3502
 )";
-  string expectedOutput = R"(successful
+  string expectedOutput = R"(unsuccessful
 successful
 successful
-successful
+unsuccessful
 unsuccessful
 2
 )";
@@ -138,17 +129,17 @@ unsuccessful
 }
 TEST_CASE("Incorrect Commands 3", "[flag]") {
   string input = R"(6
-insert "Student A" 10000001 1 1 COP3502
+insert "Student A" 7733333 1 1 COP3502
 insert "Student B" 10000002 1 1 COP3502
 insert "Student C" 10000003 1 2 COP3502 MAC2311
 dropClass 10000001 COP3502
 remove 10000001
 removeClass COP3502
 )";
-  string expectedOutput = R"(successful
+  string expectedOutput = R"(unsuccessful
 successful
 successful
-successful
+unsuccessful
 unsuccessful
 2
 )";
@@ -166,17 +157,17 @@ unsuccessful
 }
 TEST_CASE("Incorrect Commands 4", "[flag]") {
   string input = R"(6
-insert "Student A" 10000001 1 1 COP3502
+inblert "Student A" 10000001 1 1 COP3502
 insert "Student B" 10000002 1 1 COP3502
 insert "Student C" 10000003 1 2 COP3502 MAC2311
 dropClass 10000001 COP3502
 remove 10000001
 removeClass COP3502
 )";
-  string expectedOutput = R"(successful
+  string expectedOutput = R"(unsuccessful
 successful
 successful
-successful
+unsuccessful
 unsuccessful
 2
 )";
@@ -197,15 +188,15 @@ TEST_CASE("Incorrect Commands 5", "[flag]") {
 insert "Student A" 10000001 1 1 COP3502
 insert "Student B" 10000002 1 1 COP3502
 insert "Student C" 10000003 1 2 COP3502 MAC2311
-dropClass 10000001 COP3502
+dropClass 10000001 COP3502 10234567
 remove 10000001
 removeClass COP3502
 )";
   string expectedOutput = R"(successful
 successful
 successful
-successful
 unsuccessful
+successful
 2
 )";
   std::stringstream iss(input);
@@ -219,4 +210,268 @@ unsuccessful
   }
   REQUIRE(actualOutput == expectedOutput);
 
+}
+TEST_CASE("Edge Case 1", "[flag]") {
+  string input = R"(2
+insert "Student A" 10000001 1 1 COP3502
+remove 10000002
+)";
+  string expectedOutput = R"(successful
+unsuccessful
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("Edge Case 2", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502 10234567
+remove 10000001
+removeClass COP3502
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+unsuccessful
+successful
+2
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("Edge Case 3", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502 10234567
+remove 10000001
+removeClass COP3509
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+unsuccessful
+successful
+0
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+
+TEST_CASE("Drop Class Remove Class Replace Class", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 1 1 COP3502
+insert "Student B" 10000002 1 1 COP3502
+insert "Student C" 10000003 1 2 COP3502 MAC2311
+dropClass 10000001 COP3502
+removeClass MAC2311
+replaceClass 10000002 COP3502 MAC2311
+)";
+  string expectedOutput = R"(successful
+successful
+successful
+successful
+1
+successful
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+
+TEST_CASE("printShortestEdges", "[flag]") {
+  string input = R"(6
+insert "Student A" 10000001 9 1 MAC2311
+printShortestEdges 10000001
+toggleEdgesClosure 4 18 15 18 17 18 25 18 34
+printShortestEdges 10000001
+)";
+  string expectedOutput = R"(successful
+Name: Student A
+MAC2311 | Total Time: 17
+successful
+Name: Student A
+MAC2311 | Total Time: -1
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+
+}
+TEST_CASE("unique IDs, 8 digit IDs, no special characters in name, valid ClassCode, checking non existent edge (0/5)", "[flag]") {
+  string input = R"(11
+insert "John Doe" 11111111 1 1 COP3530
+insert "Jane Doe" 11111111 1 1 COP3530
+insert "John Doe" 22222222 1 1 COP3530
+insert "@lbert" 33333333 1 1 COP3530
+insert "Albert" 4 1 1 COP3530
+insert "Albert" 00000004 1 1 COP3530
+insert "John Doe" 55555555 1 1 cop3530
+insert "John Doe" 55555555 1 1 C@P3530
+insert "John Doe" 55555555 1 1 3530COP
+insert "John Doe" 55555555 1 1 COP3530
+checkEdgeStatus 12 17
+)";
+  string expectedOutput = R"(successful
+unsuccessful
+successful
+unsuccessful
+unsuccessful
+successful
+unsuccessful
+unsuccessful
+unsuccessful
+successful
+DNE
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+}
+TEST_CASE("Checking printShortestEdges after dropping/replacing classes (0/5)", "[flag]") {
+  string input = R"(12
+insert "Student A" 11111111 12 3 CDA3101 MAC2313 COP3502
+insert "Student B" 22222222 10 2 COP3502 MAC2311
+printShortestEdges 11111111
+dropClass 11111111 MAC2313
+printShortestEdges 11111111
+replaceClass 11111111 CDA3101 MAC2311
+printShortestEdges 11111111
+removeClass COP3502
+printShortestEdges 11111111
+printShortestEdges 22222222
+dropClass 11111111 COP3502
+replaceClass 11111111 COP3502 IDS2935
+)";
+  string expectedOutput = R"(successful
+successful
+Name: Student A
+CDA3101 | Total Time: 3
+COP3502 | Total Time: 5
+MAC2313 | Total Time: 10
+successful
+Name: Student A
+CDA3101 | Total Time: 3
+COP3502 | Total Time: 5
+successful
+Name: Student A
+COP3502 | Total Time: 5
+MAC2311 | Total Time: 8
+2
+Name: Student A
+MAC2311 | Total Time: 8
+Name: Student B
+MAC2311 | Total Time: 9
+unsuccessful
+unsuccessful
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
+}
+
+TEST_CASE("Checking printShortestEdges after dropping/replacing classes (0/5)", "[flag]") {
+  string input = R"(13
+insert "John" 11111111 20 4 EEL3701 EEL4744 EEL3111 CEN4907
+verifySchedule 11111111
+insert "Jane" 22222222 30 2 MAC2313 MAP2302
+verifySchedule 22222222
+insert "Albert" 33333333 1 2 COP3503 CNT4007
+verifySchedule 33333333
+toggleEdgesClosure 1 6 43
+verifySchedule 33333333
+toggleEdgesClosure 1 6 43
+verifySchedule 33333333
+insert "Aman" 44444444 1 1 COP4600
+verifySchedule 44444444
+)";
+  string expectedOutput = R"(successful
+Schedule Check for John:
+EEL3701 - EEL4744 "Can make it!"
+EEL4744 - EEL3111 "Can make it!"
+EEL3111 - CEN4907 "Can make it!"
+successful
+Schedule Check for Jane:
+MAC2313 - MAP2302 "Can make it!"
+successful
+Schedule Check for Albert:
+COP3503 - CNT4007 "Can make it!"
+successful
+Schedule Check for Albert:
+COP3503 - CNT4007 "Cannot make it!"
+successful
+Schedule Check for Albert:
+COP3503 - CNT4007 "Can make it!"
+successful
+unsuccessful
+)";
+  std::stringstream iss(input);
+  string actualOutput;
+  std::string line;
+  CampusCompass c;
+  c.ParseCSV("../data/edges.csv", "../data/classes.csv");
+  std::getline(iss, line);
+  while (std::getline(iss, line)) {
+    actualOutput += c.ParseCommand(line)+'\n';
+  }
+  REQUIRE(actualOutput == expectedOutput);
 }

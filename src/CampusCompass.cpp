@@ -101,41 +101,44 @@ std::string CampusCompass::ParseCommand(const string &command) {
         return "unsuccessful";
     }
     if (words[0]=="insert") {
-        if (words.size()<6 || words[1].length()<2 || !isNumber(words[2]) || !isNumber(words[3]) || !isNumber(words[4]) || (int)words.size()-5!=std::stoi(words[4]) || stoi(words[3])>=(int)map.size()) {
+        if (words.size()<6 || words[1].length()<2 || !isNumber(words[2]) || !isNumber(words[3]) || !isNumber(words[4]) || (int)words.size()-5!=std::stoi(words[4]) || stoi(words[3])>=(int)map.size() || students.count(words[2])) {
             return "unsuccessful";
         }
         std::vector <std::string> c;
         for (size_t i = 5; i < words.size(); i++) {
+            if (!validClass(words[i])) {
+                return "unsuccessful";
+            }
             c.push_back(words[i]);
         }
-        if (insert(words[1].substr(1,words[1].length()-2),std::stoi(words[2]),std::stoi(words[3]),c)) {
+        if (insert(words[1].substr(1,words[1].length()-2),(words[2]),std::stoi(words[3]),c)) {
             return "successful";
         }
         return "unsuccessful";
     }
     if (words[0]=="remove") {
-        if (words.size()!=2 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
+        if (words.size()!=2 || !isNumber(words[1]) || !validID((words[1]))) {
             return "unsuccessful";
         }
-        if (remove(std::stoi(words[1]))) {
+        if (remove((words[1]))) {
             return "successful";
         }
         return "unsuccessful";
     }
     if (words[0]=="dropClass") {
-        if (words.size()!=3 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
+        if (words.size()!=3 || !isNumber(words[1]) || !validID((words[1]))) {
             return "unsuccessful";
         }
-        if (drop(std::stoi(words[1]),words[2])) {
+        if (drop((words[1]),words[2])) {
             return "successful";
         }
         return "unsuccessful";
     }
     if (words[0]=="replaceClass") {
-        if (words.size()!=4 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
+        if (words.size()!=4 || !isNumber(words[1]) || !validID((words[1]))) {
             return "unsuccessful";
         }
-        if (replace(std::stoi(words[1]),words[2],words[3])) {
+        if (replace((words[1]),words[2],words[3])) {
             return "successful";
         }
         return "unsuccessful";
@@ -176,13 +179,13 @@ std::string CampusCompass::ParseCommand(const string &command) {
         return "unsuccessful";
     }
     if (words[0]=="printShortestEdges") {
-        if (words.size()!=2 || !isNumber(words[1]) || !validID(std::stoi(words[1]))) {
+        if (words.size()!=2 || !isNumber(words[1]) || !validID((words[1]))) {
             return "unsuccessful";
         }
-        std::string s;
-        std::map<std::string,int> e = shortestEdges(std::stoi(words[1]));
+        std::string s = "Name: "+students[(words[1])]->name+"\n";
+        std::map<std::string,int> e = shortestEdges((words[1]));
         for (auto it = e.begin(); it != e.end(); ++it) {
-            s+="Name: "+students[std::stoi(words[1])]->name+"\n"+it->first+" | Total Time: "+to_string(it->second)+"\n";
+            s+=it->first+" | Total Time: "+to_string(it->second)+"\n";
         }
         if (!s.empty()) {
             s=s.substr(0,s.length()-1);
@@ -190,16 +193,16 @@ std::string CampusCompass::ParseCommand(const string &command) {
         return s;
     }
     if (words[0]=="printStudentZone") {
-        if (words.size()!=2 || !isNumber(words[1]) ||!validID(std::stoi(words[1]))) {
+        if (words.size()!=2 || !isNumber(words[1]) ||!validID((words[1]))) {
             return "unsuccessful";
         }
-        return "Student Zone Cost For "+students[stoi(words[1])]->name+": " + to_string(studentZone(std::stoi(words[1])));
+        return "Student Zone Cost For "+students[(words[1])]->name+": " + to_string(studentZone((words[1])));
     }
     if (words[0]=="verifySchedule") {
-        if (words.size()!=2 || !isNumber(words[1]) ||!validID(std::stoi(words[1]))) {
+        if (words.size()!=2 || !isNumber(words[1]) ||!validID((words[1]))) {
             return "unsuccessful";
         }
-        std::string ret = verifySchedule(stoi(words[1]));
+        std::string ret = verifySchedule((words[1]));
         if (!ret.empty() && ret!="unsuccessful") {
             return ret.substr(0, ret.size()-1);
         }
@@ -208,7 +211,7 @@ std::string CampusCompass::ParseCommand(const string &command) {
     return "unsuccessful";
 }
 
-bool CampusCompass::insert(std::string n, int id, int residence, std::vector<std::string> c) {
+bool CampusCompass::insert(std::string n, std::string id, int residence, std::vector<std::string> c) {
     if (!validID(id) || !validName(n) || students.count(id) || c.empty() || c.size()>6) {
         return false;
     }
@@ -218,7 +221,7 @@ bool CampusCompass::insert(std::string n, int id, int residence, std::vector<std
     }
     return true;
 }
-bool CampusCompass::remove(int id) {
+bool CampusCompass::remove(std::string id) {
     if (!students.count(id)) {
         return false;
     }
@@ -227,7 +230,7 @@ bool CampusCompass::remove(int id) {
     return true;
 }
 
-bool CampusCompass::drop(int id,std::string className) {
+bool CampusCompass::drop(std::string id,std::string className) {
     if (!students.count(id) || !students[id]->classes.count(className) || !AllClasses.count(className)) {
         return false;
     }
@@ -237,7 +240,7 @@ bool CampusCompass::drop(int id,std::string className) {
     }
     return true;
 }
-bool CampusCompass::replace(int id, std::string class1, std::string class2) {
+bool CampusCompass::replace(std::string id, std::string class1, std::string class2) {
     if (!students.count(id) || !students[id]->classes.count(class1) || students[id]->classes.count(class2) || !AllClasses.count(class2)) {
         return false;
     }
@@ -247,13 +250,13 @@ bool CampusCompass::replace(int id, std::string class1, std::string class2) {
 }
 int CampusCompass::removeClass(std::string className) {
     int count = 0;
-    std::vector<int> toRemove;
+    std::vector<std::string> toRemove;
     for (auto p : students) {
         if (p.second->classes.count(className)) {
             toRemove.push_back(p.first);
         }
     }
-    for (int id : toRemove) {
+    for (std::string id : toRemove) {
         drop(id, className);
         count++;
     }
@@ -303,7 +306,7 @@ bool CampusCompass::isConnected(int p1, int p2) {
     }
     return false;
 }
-std::map<std::string,int> CampusCompass::shortestEdges(int id) {
+std::map<std::string,int> CampusCompass::shortestEdges(std::string id) {
     //stores return times
     std::map<std::string,int> times;
     //location id -> distance
@@ -346,11 +349,15 @@ std::map<std::string,int> CampusCompass::shortestEdges(int id) {
             }
         }
     }
-
+    for (auto it : students[id]->classes) {
+        if (!times.count(it)) {
+            times[it] = -1;
+        }
+    }
     return times;
 }
 
-int CampusCompass::studentZone(int id) {
+int CampusCompass::studentZone(std::string id) {
     //dikstras finds shortest paths for classes
     std::unordered_set<int> visited;
     std::unordered_map<int,int> distances;
@@ -462,21 +469,24 @@ int CampusCompass::shortestPath(int startLocation,int endLocation) {
     return -1;
 }
 
-std::string CampusCompass::verifySchedule(int ID) {
-    if (students[ID]->classes.size()<=1) {
+std::string CampusCompass::verifySchedule(std::string ID) {
+    if (!students.count(ID) || students[ID]->classes.size()<=1) {
         return "unsuccessful";
     }
     std::string ret;
+    //order classes by start time
     std::priority_queue<std::pair<int,std::string>> q;
     for (auto it : startTimes) {
         if (students[ID]->classes.count(it.first)) {
             q.push({it.second,it.first});
         }
     }
+    //check each class pair for validity
     std::string start = q.top().second;
     q.pop();
     while (!q.empty()) {
-        if (startTimes[start] + shortestPath(AllClasses[start],AllClasses[q.top().second]) < q.top().first) {
+        //mini dikstras // endtime+traveltime < starttime
+        if (endTimes[start] + shortestPath(AllClasses[start],AllClasses[q.top().second]) < q.top().first) {
             ret+=start + " - " + q.top().second + " \"Can make it!\"\n";
         }
         else {

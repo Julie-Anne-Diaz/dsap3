@@ -3,7 +3,7 @@
 #include <string>
 
 bool validName(std::string s);
-bool validID(int i);
+bool validID(std::string i);
 bool isNumber(std::string s);
 bool validClass(std::string s);
 std::vector<std::string> SplitCommand(const std::string& command);
